@@ -1,11 +1,18 @@
 module.exports = {
-  async buscarReservasPorMesa(mesa) {
-    throw new Error("IMPLEMENTE AQUI COM O BANCO DE DADOS REAL");
+  // Métodos existentes...
+  verificarDisponibilidadeMesa: async (mesa, data) => {
+    // Implemente a lógica para verificar se a mesa está livre
   },
-  async buscarReservasPorPeriodo(inicio, fim) {
-    throw new Error("IMPLEMENTE AQUI COM O BANCO DE DADOS REAL");
+  criarReserva: async (dadosReserva) => {
+    // Implemente a criação da reserva
   },
-  async buscarReservasConfirmadas() {
-    throw new Error("IMPLEMENTE AQUI COM O BANCO DE DADOS REAL");
+  atualizarReserva: async (id, dadosAtualizados) => {
+    // Implemente a atualização da reserva
+  },
+  atualizarStatusMesa: async (mesa, status) => {
+    // Implemente a atualização do status da mesa
+  },
+  buscarMesasLivres: async () => {
+    // Implemente a busca por mesas livres
   }
 };
