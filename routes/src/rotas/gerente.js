@@ -1,21 +1,16 @@
 const express = require('express');
 const router = express.Router();
-const db = require('../db/database'); // Importa o módulo do banco de dados
+const db = require('../db/database');
 
 /**
  * Rota para relatórios do gerente
- * Tipos suportados:
- * - por-mesa: Filtra por número da mesa
- * - por-periodo: Filtra por intervalo de datas
- * - confirmadas: Lista apenas reservas confirmadas
  */
 router.get('/relatorios', async (req, res) => {
   try {
-    const { tipo, mesa, inicio, fim } = req.query;
+    const { tipo, mesa, inicio, fim, status } = req.query;
 
-    // Validação básica
     if (!tipo) {
-      return res.status(400).json({ erro: 'O parâmetro "tipo" é obrigatório' });
+      return res.status(400).json({ erro: 'O parâmetro "tipo" é necessário' });
     }
 
     let resultado;
@@ -34,6 +29,10 @@ router.get('/relatorios', async (req, res) => {
       case 'confirmadas':
         resultado = await db.buscarReservasConfirmadas();
         break;
+
+      case 'mesas-livres':
+        resultado = await db.buscarMesasLivres();
+        break;
       
       default:
         return res.status(400).json({ erro: 'Tipo de relatório inválido' });
@@ -49,6 +48,71 @@ router.get('/relatorios', async (req, res) => {
     res.status(500).json({ 
       sucesso: false,
       erro: 'Falha ao gerar relatório' 
+    });
+  }
+});
+
+/**
+ * Nova rota para cadastrar reserva (atendente)
+ */
+router.post('/reservas', async (req, res) => {
+  try {
+    const { mesa, cliente, data } = req.body;
+    
+    // Verifica se a mesa está livre
+    const mesaDisponivel = await db.verificarDisponibilidadeMesa(mesa, data);
+    if (!mesaDisponivel) {
+      return res.status(400).json({ erro: 'Mesa já reservada para este horário' });
+    }
+
+    // Cria reserva com status "reservada"
+    const reserva = await db.criarReserva({
+      mesa,
+      cliente,
+      data,
+      status: 'reservada' // Status muda ao ser reservada
+    });
+
+    res.json({
+      sucesso: true,
+      dados: reserva
+    });
+
+  } catch (erro) {
+    console.error('Erro ao criar reserva:', erro);
+    res.status(500).json({ 
+      sucesso: false,
+      erro: 'Falha ao criar reserva' 
+    });
+  }
+});
+
+/**
+ * Nova rota para confirmar ocupação (garçom)
+ */
+router.put('/reservas/:id/confirmar', async (req, res) => {
+  try {
+    const { id } = req.params;
+    
+    // Atualiza status para "confirmada"
+    const reserva = await db.atualizarReserva(id, { 
+      status: 'confirmada',
+      garcom: req.body.garcom 
+    });
+
+    // Libera a mesa (opcional depende da sua regra de negócio)
+    await db.atualizarStatusMesa(reserva.mesa, 'livre');
+
+    res.json({
+      sucesso: true,
+      dados: reserva
+    });
+
+  } catch (erro) {
+    console.error('Erro ao confirmar reserva:', erro);
+    res.status(500).json({ 
+      sucesso: false,
+      erro: 'Falha ao confirmar reserva' 
     });
   }
 });
