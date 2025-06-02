@@ -1,118 +1,65 @@
 const express = require('express');
 const router = express.Router();
-const db = require('../db/database');
+const db = require('../db');
 
-/**
- * Rota para relatórios do gerente
- */
+// Relatório
+router.get('/relatorio-consolidado', async (req, res) => {
+  try {
+    const resumo = (await db.query(
+      SELECT status, COUNT(*) as total 
+      FROM mesas 
+      GROUP BY status
+    )).rows;
+
+    const livres = (await db.query("SELECT id, numero FROM mesas WHERE status = 'livre'")).rows;
+    const reservadas = (await db.query("SELECT id, numero FROM mesas WHERE status = 'reservada'")).rows;
+    const confirmadas = (await db.query("SELECT id, numero FROM mesas WHERE status = 'confirmada'")).rows;
+
+    res.json({
+      resumo,
+      detalhes: { livres, reservadas, confirmadas }
+    });
+
+  } catch (error) {
+    console.error("Erro no relatório consolidado:", error);
+    res.status(500).json({ error: "Erro ao gerar relatório consolidado" });
+  }
+});
+
+// Relatórios com filtros avançados
 router.get('/relatorios', async (req, res) => {
   try {
-    const { tipo, mesa, inicio, fim, status } = req.query;
+    const { status, mesa, inicio, fim } = req.query;
+    let query = "SELECT * FROM reservas WHERE 1=1";
+    const values = [];
 
-    if (!tipo) {
-      return res.status(400).json({ erro: 'O parâmetro "tipo" é necessário' });
+    if (status) {
+      query += " AND status = $" + (values.length + 1);
+      values.push(status);
     }
 
-    let resultado;
-    
-    switch (tipo) {
-      case 'por-mesa':
-        if (!mesa) return res.status(400).json({ erro: 'Número da mesa é obrigatório' });
-        resultado = await db.buscarReservasPorMesa(mesa);
-        break;
-      
-      case 'por-periodo':
-        if (!inicio || !fim) return res.status(400).json({ erro: 'Data de início e fim são obrigatórias' });
-        resultado = await db.buscarReservasPorPeriodo(inicio, fim);
-        break;
-      
-      case 'confirmadas':
-        resultado = await db.buscarReservasConfirmadas();
-        break;
-
-      case 'mesas-livres':
-        resultado = await db.buscarMesasLivres();
-        break;
-      
-      default:
-        return res.status(400).json({ erro: 'Tipo de relatório inválido' });
+    if (mesa) {
+      query += " AND mesa_numero = $" + (values.length + 1);
+      values.push(mesa);
     }
+
+    if (inicio && fim) {
+      query += " AND data_reserva BETWEEN $" + (values.length + 1) + " AND $" + (values.length + 2);
+      values.push(inicio, fim);
+    }
+
+    const resultado = (await db.query(query, values)).rows;
 
     res.json({
       sucesso: true,
       dados: resultado || []
     });
 
-  } catch (erro) {
-    console.error('Erro no relatório:', erro);
-    res.status(500).json({ 
+  } catch (error) {
+    console.error("Erro no relatório filtrado:", error);
+    res.status(500).json({
       sucesso: false,
-      erro: 'Falha ao gerar relatório' 
-    });
-  }
-});
-
-/**
- * Nova rota para cadastrar reserva (atendente)
- */
-router.post('/reservas', async (req, res) => {
-  try {
-    const { mesa, cliente, data } = req.body;
-    
-    // Verifica se a mesa está livre
-    const mesaDisponivel = await db.verificarDisponibilidadeMesa(mesa, data);
-    if (!mesaDisponivel) {
-      return res.status(400).json({ erro: 'Mesa já reservada para este horário' });
-    }
-
-    // Cria reserva com status "reservada"
-    const reserva = await db.criarReserva({
-      mesa,
-      cliente,
-      data,
-      status: 'reservada' // Status muda ao ser reservada
-    });
-
-    res.json({
-      sucesso: true,
-      dados: reserva
-    });
-
-  } catch (erro) {
-    console.error('Erro ao criar reserva:', erro);
-    res.status(500).json({ 
-      sucesso: false,
-      erro: 'Falha ao criar reserva' 
-    });
-  }
-});
-
-/**
- * Nova rota para confirmar ocupação (garçom)
- */
-router.put('/reservas/:id/confirmar', async (req, res) => {
-  try {
-    const { id } = req.params;
-    
-    // Atualiza status para "confirmada"
-    const reserva = await db.atualizarReserva(id, { 
-      status: 'confirmada',
-      garcom: req.body.garcom 
-    });
-
-    // Libera a mesa (opcional depende da sua regra de negócio)
-    await db.atualizarStatusMesa(reserva.mesa, 'livre');
-
-    res.json({
-      sucesso: true,
-      dados: reserva
-    });
-
-  } catch (erro) {
-    console.error('Erro ao confirmar reserva:', erro);
-    res.status(500).json({ 
-      sucesso: false,
-      erro: 'Falha ao confirmar reserva' 
+      error: "Erro ao filtrar relatório"
     });
   }
 });
