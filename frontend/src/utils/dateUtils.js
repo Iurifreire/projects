@@ -40,3 +40,15 @@ export const formatarHora = (hora) => {
     // Pega apenas a parte da hora, ignorando os segundos
     return hora.substring(0, 5); // ex: "19:00:00" -> "19:00"
 };
+
+export const formatarDataBrasileira = (dataStr) => {
+    if (!dataStr) return '';
+    
+    // Converte de "AAAA/MM/DD" para "DD/MM/AAAA"
+    if (dataStr.includes('/')) {
+        const [ano, mes, dia] = dataStr.split('/');
+        return `${dia}/${mes}/${ano}`;
+    }
+    
+    return dataStr; // Caso não seja o formato esperado
+};

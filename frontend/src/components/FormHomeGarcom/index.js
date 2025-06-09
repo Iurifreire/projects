@@ -1,6 +1,6 @@
 import { useState } from 'react';
 import { Modal } from '../Modal';
-import { parseDiaMesAno, formatarHora } from '../../utils/dateUtils';
+import { parseDiaMesAno, formatarHora, formatarDataBrasileira } from '../../utils/dateUtils';
 import { confirmarReservaAPI } from '../../services/userServiceAPI';
 import './FormHomeGarcom.css';
 
@@ -58,7 +58,7 @@ export const FormHomeGarcom = ({
                         const [ano, mes, dia] = r.data.split('/');
                         return {
                             Mesa: r.numeMesa,
-                            Data: r.data,
+                            Data: formatarDataBrasileira(r.data), // Mudando a data para DD/MM/AAAA
                             Hora: formatarHora(r.hora),
                             Status: r.statusMesa,
                             _dataOrdenacao: new Date(ano, mes - 1, dia).getTime()
@@ -80,7 +80,7 @@ export const FormHomeGarcom = ({
                         return {
                             Garçom: r.garcomResponsavel,
                             Mesa: r.numeMesa,
-                            Data: r.data, // Mantém no formato original para exibição
+                            Data: formatarDataBrasileira(r.data), // Mudando a data para DD/MM/AAAA
                             Hora: formatarHora(r.hora),
                             Status: 'confirmada',
                             // Campo auxiliar para ordenação:
@@ -119,7 +119,7 @@ export const FormHomeGarcom = ({
                         const [ano, mes, dia] = r.data.split('/');
                         return {
                             Mesa: r.numeMesa,
-                            Data: r.data,
+                            Data: formatarDataBrasileira(r.data), // Mudando a data para DD/MM/AAAA
                             Hora: formatarHora(r.hora),
                             Status: r.statusMesa,
                             _dataOrdenacao: new Date(ano, mes - 1, dia).getTime()
