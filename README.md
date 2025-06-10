@@ -162,7 +162,7 @@ node App.js
 ```
 ## 🎥 Demonstração da aplicação
 
-[Demostração](https://www.youtube.com/watch?v=M0mtZd-Udrs)
+[Demonstração do fluxo de negócio do app](https://www.youtube.com/watch?v=M0mtZd-Udrs)
 ---
 
 ## 📝 Observações Importantes!
