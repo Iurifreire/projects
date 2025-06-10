@@ -162,7 +162,7 @@ node App.js
 ```
 ## 🎥 Demonstração da aplicação
 
-[![Demostração]](https://www.youtube.com/watch?v==M0mtZd-Udrs)
+[Demostração](https://www.youtube.com/watch?v==M0mtZd-Udrs)
 ---
 
 ## 📝 Observações Importantes!
