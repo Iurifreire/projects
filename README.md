@@ -162,7 +162,7 @@ node App.js
 ```
 ## 🎥 Demonstração da aplicação
 
-<iframe width="560" height="315" src="https://www.youtube.com/embed/abc12345" frameborder="0" allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture" allowfullscreen></iframe>
+[![Demostração](https://img.youtube.com/vi/=M0mtZd-Udrs/0.jpg)](https://www.youtube.com/watch?v==M0mtZd-Udrs)
 ---
 
 ## 📝 Observações Importantes!
