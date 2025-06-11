@@ -1,6 +1,7 @@
 import axios from "axios";
 
-const API_URL = "http://localhost:3001/api/reserva";
+const BASE_URL = process.env.REACT_APP_API_URL || "http://localhost:3001/api";
+const API_URL = `${BASE_URL}/reserva`;
 
 export const getReservas = async () => {
     const response = await fetch(API_URL);
@@ -11,7 +12,7 @@ export async function criarReserva(reserva) {
     try {
         console.log('Enviando reserva:', reserva);
 
-        const response = await axios.post('http://localhost:3001/api/reserva', {
+        const response = await axios.post(API_URL, {
             data: reserva.data,
             hora: reserva.hora,
             numeMesa: parseInt(reserva.numeMesa),

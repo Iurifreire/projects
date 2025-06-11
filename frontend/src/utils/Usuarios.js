@@ -3,6 +3,9 @@ import { getReservas, getLoggedUser } from "../services/userService.js";
 import { validarNovaReserva } from "./validacoes.js";
 
 
+const BASE_URL = process.env.REACT_APP_API_URL || "http://localhost:3001/api";
+const API_URL = `${BASE_URL}/reserva`;
+
 
 function existeReservaNoMesmoDia(reservas, novaReserva) {
     return reservas.some(reserva =>
@@ -108,7 +111,7 @@ class Atendente extends Usuario {
 
 
         try {
-            const response = await fetch("http://localhost:3001/api/reserva", {
+            const response = await fetch(API_URL, {
                 method: "POST",
                 headers: {
                     "Content-Type": "application/json"
